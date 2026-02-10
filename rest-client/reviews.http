@@ -1,0 +1,26 @@
+### Get all reviews
+GET http://localhost:3000/api/reviews
+
+### Get review by id
+GET http://localhost:3000/api/reviews/1
+
+### Create review
+POST http://localhost:3000/api/reviews
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "This is an excellent product with great quality!"
+}
+
+### Update review
+PUT http://localhost:3000/api/reviews/1
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "comment": "Good product, but could be better"
+}
+
+### Delete review
+DELETE http://localhost:3000/api/reviews/1
