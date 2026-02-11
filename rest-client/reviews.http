@@ -10,7 +10,8 @@ Content-Type: application/json
 
 {
   "rating": 5,
-  "comment": "This is an excellent product with great quality!"
+  "hamada": 4,
+  "comment": "Amazing product!"
 }
 
 ### Update review
@@ -19,7 +20,8 @@ Content-Type: application/json
 
 {
   "rating": 4,
-  "comment": "Good product, but could be better"
+  "hamada": 3,
+  "comment": "Good quality"
 }
 
 ### Delete review
