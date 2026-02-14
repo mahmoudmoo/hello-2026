@@ -9,7 +9,8 @@ import {
     ParseIntPipe,
 } from '@nestjs/common';
 
-import { ProductDto } from './dtos/products.dto';
+import { CreateProductDto } from './dtos/creat-products.dto';
+import { UpdateProductDto } from './dtos/update-product.dto';
 import { ProductsService } from './products.service';
 
 @Controller()
@@ -19,30 +20,30 @@ export class ProductsController {
     // GET /api/products - Get all p roducts
     @Get('/api/products')
     public getAllProducts() {
-        return this.productsService.findAll();
+        return this.productsService.getAllProducts();
     }
 
     // POST /api/products - Create a new product
     @Post('/api/products')
-    public createProduct(@Body() body: ProductDto) {
-        return this.productsService.create(body);
+    public createProduct(@Body() body: CreateProductDto) {
+        return this.productsService.createProduct(body);
     }
 
     // GET /api/products/:id - Get product by id
     @Get('/api/products/:id')
     public getProductById(@Param('id', ParseIntPipe) id: number) {
-        return this.productsService.findById(id);
+        return this.productsService.getProductById(id);
     }
 
     // PUT /api/products/:id - Update product by id
     @Put('/api/products/:id')
-    public updateProduct(@Param('id') id: string, @Body() body: ProductDto) {
-        return this.productsService.update(parseInt(id), body);
+    public updateProduct(@Param('id') id: string, @Body() body: UpdateProductDto) {
+        return this.productsService.updateProduct(parseInt(id), body);
     }
 
     // DELETE /api/products/:id - Delete product by id
     @Delete('/api/products/:id')
     public deleteProduct(@Param('id') id: string) {
-        return this.productsService.remove(parseInt(id));
+        return this.productsService.deleteProduct(parseInt(id));
     }
 }
