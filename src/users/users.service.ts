@@ -5,6 +5,7 @@ import { UserEntity } from './user.entity';
 import { RegisterDto } from './dtos/register.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { LoginDto } from './dtos/login.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +29,11 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
-
+ /**
+   * register 
+   * @param registerDto Data for register new user 
+   * @returns JWT (access token)
+   */
   async register(dto: RegisterDto) {
     const { email, password, username } = dto
     const userFromDb = await this.usersRepository.findOne({ where: { email } })
@@ -41,6 +46,21 @@ export class UsersService {
     user=await this.usersRepository.save(user);
     return user
   }
+
+  /**
+   * login 
+   * @param LoginDto Data for login to user acccount 
+   * @returns JWT (access token)
+   */
+  async login(dto:LoginDto){
+    const {email,password}=dto;
+    const user = await this.usersRepository.findOne({ where: { email } })
+    if (!user) throw new BadRequestException("invalid email or password")
+   const isPasswordMatch=  await bcrypt.compare(password,user.password);
+if(!isPasswordMatch)throw new BadRequestException("invalid email or password")
+// ToDo -->Generate JWT token
+  return user;  
+}
 
   async updateUser(id: number, dto: UpdateUserDto) {
     const user = await this.getUserById(id);

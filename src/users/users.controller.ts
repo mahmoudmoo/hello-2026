@@ -7,10 +7,13 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RegisterDto } from './dtos/register.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { LoginDto } from './dtos/login.dto';
 
 @Controller()
 export class UsersController {
@@ -29,6 +32,13 @@ export class UsersController {
   @Post('/api/users/register')
   register(@Body() body: RegisterDto) {
     return this.usersService.register(body);
+  }
+
+  
+  @Post('/api/users/login')
+  @HttpCode(HttpStatus.OK)
+  login(@Body() body: LoginDto) {
+    return this.usersService.login(body);
   }
 
   @Put('/api/users/:id')
