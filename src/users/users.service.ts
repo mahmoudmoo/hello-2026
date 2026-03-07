@@ -6,12 +6,16 @@ import { RegisterDto } from './dtos/register.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dtos/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload, AccessToken } from 'src/utils/types';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
+    private readonly jwtService: JwtService,
+
   ) { }
 
   /**
@@ -29,22 +33,24 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
- /**
-   * register 
-   * @param registerDto Data for register new user 
-   * @returns JWT (access token)
-   */
-  async register(dto: RegisterDto) {
+  /**
+    * register 
+    * @param registerDto Data for register new user 
+    * @returns JWT (access token)
+    */
+  async register(dto: RegisterDto): Promise<{ user: UserEntity, token: AccessToken }> {
     const { email, password, username } = dto
     const userFromDb = await this.usersRepository.findOne({ where: { email } })
     if (userFromDb) throw new BadRequestException("user already exist")
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(password, salt)
+    let user = this.usersRepository.create({ email, password: hashPassword, username });
+    
 
-
-    let user = this.usersRepository.create({email,password:hashPassword,username});
-    user=await this.usersRepository.save(user);
-    return user
+    const token = await this.generateJwtToken({ id: user.id, email: user.email });
+    
+    user = await this.usersRepository.save(user);
+    return { user, token }
   }
 
   /**
@@ -52,15 +58,16 @@ export class UsersService {
    * @param LoginDto Data for login to user acccount 
    * @returns JWT (access token)
    */
-  async login(dto:LoginDto){
-    const {email,password}=dto;
+  async login(dto: LoginDto): Promise<{ user: UserEntity, token: AccessToken }> {
+    const { email, password } = dto;
     const user = await this.usersRepository.findOne({ where: { email } })
     if (!user) throw new BadRequestException("invalid email or password")
-   const isPasswordMatch=  await bcrypt.compare(password,user.password);
-if(!isPasswordMatch)throw new BadRequestException("invalid email or password")
-// ToDo -->Generate JWT token
-  return user;  
-}
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) throw new BadRequestException("invalid email or password");
+    
+    const token = await this.generateJwtToken({ id: user.id, email: user.email });
+    return { user, token };
+  }
 
   async updateUser(id: number, dto: UpdateUserDto) {
     const user = await this.getUserById(id);
@@ -74,5 +81,14 @@ if(!isPasswordMatch)throw new BadRequestException("invalid email or password")
     const user = await this.getUserById(id);
     await this.usersRepository.remove(user);
     return { message: 'User deleted successfully' };
+  }
+
+  /**
+   * generate JWT token
+   * @param payload JwtPayload
+   * @returns JWT token
+   */
+  private async generateJwtToken(payload: JwtPayload): Promise<AccessToken> {
+    return { access_token: await this.jwtService.signAsync(payload) } as AccessToken;
   }
 }
